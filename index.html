@@ -784,7 +784,6 @@
                 colNume: "Nume și Prenume",
                 colFunc: "Funcție / Rol",
                 colTalon: "Autorizație / Talon",
-                colCnp: "CNP",
                 colDept: "Departament",
                 colScadTalon: "Scadență Talon",
                 daysRemaining: "zile rămase",
@@ -860,7 +859,6 @@
                 colNume: "Full Name",
                 colFunc: "Role / Qualification",
                 colTalon: "ISCIR Cert. / Badge",
-                colCnp: "ID Number",
                 colDept: "Department",
                 colScadTalon: "Badge Expiry",
                 daysRemaining: "days remaining",
@@ -936,7 +934,6 @@
                 colNume: "Nom et Prénom",
                 colFunc: "Fonction / Rôle",
                 colTalon: "Autorisation ISCIR",
-                colCnp: "Identifiant",
                 colDept: "Département",
                 colScadTalon: "Échéance Carte",
                 daysRemaining: "jours restants",
@@ -1166,6 +1163,8 @@
         function normalizeazaBaza(baza) {
             const rez = baza || {};
             COLECTII.forEach(c => { if (!Array.isArray(rez[c])) rez[c] = []; });
+            // Rubrica CNP a fost eliminată: nu se mai păstrează nicăieri
+            rez.personal.forEach(p => { if (p && 'cnp' in p) delete p.cnp; });
             if (!rez._sterse || typeof rez._sterse !== 'object') rez._sterse = {};
             return rez;
         }
@@ -1618,7 +1617,6 @@
                     <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colNume}:</label><input id="m_nume" class="input-field" value="${esc(item.nume)}" placeholder="ex: Popescu Ioan"></div>
                     <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colFunc}:</label><input id="m_func" class="input-field" value="${esc(item.functie)}" placeholder="ex: Stivuitorist, Macaragiu"></div>
                     <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colTalon}:</label><input id="m_talon" class="input-field" value="${esc(item.talon)}" placeholder="ex: C_61C_047498"></div>
-                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colCnp}:</label><input id="m_cnp" class="input-field" value="${esc(item.cnp)}" placeholder="ex: 1850918055085"></div>
                     <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colDept}:</label><input id="m_dept" class="input-field" value="${esc(item.departament)}" placeholder="ex: Logistica, Tehnic"></div>
                     <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colScadTalon}:</label><input type="date" id="m_scad" class="input-field" value="${esc(item.scadenta)}"></div>
                 `;
@@ -1672,7 +1670,6 @@
                         item.nume = nume;
                         item.functie = document.getElementById('m_func').value.trim();
                         item.talon = talon;
-                        item.cnp = document.getElementById('m_cnp').value.trim();
                         item.departament = document.getElementById('m_dept').value.trim();
                         item.scadenta = scad;
                     }
@@ -1684,7 +1681,6 @@
                         nume: nume,
                         functie: document.getElementById('m_func').value.trim(),
                         talon: talon,
-                        cnp: document.getElementById('m_cnp').value.trim(),
                         departament: document.getElementById('m_dept').value.trim(),
                         scadenta: scad,
                         stare: "Activ"
@@ -2073,7 +2069,7 @@
                         <div class="table-wrapper">
                             <table>
                                 <thead>
-                                    <tr><th>${t.colNume}</th><th>${t.colFunc}</th><th>${t.colTalon}</th><th>${t.colCnp}</th><th>${t.colDept}</th><th>${t.colScadTalon}</th><th>${t.colStatus}</th><th class="admin-only">${t.colActions}</th></tr>
+                                    <tr><th>${t.colNume}</th><th>${t.colFunc}</th><th>${t.colTalon}</th><th>${t.colDept}</th><th>${t.colScadTalon}</th><th>${t.colStatus}</th><th class="admin-only">${t.colActions}</th></tr>
                                 </thead>
                                 <tbody>
                                     ${items.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:16px;">${t.noRecords}</td></tr>` : ''}
@@ -2084,7 +2080,6 @@
                                                 <td><strong>${esc(p.nume)}</strong><div><span class="badge badge-state">${esc(traduceTermen(p.stare || 'Activ'))}</span></div></td>
                                                 <td>${esc(traduceTermen(p.functie))}</td>
                                                 <td><code>${esc(p.talon)}</code></td>
-                                                <td><small>${esc(p.cnp)}</small></td>
                                                 <td>${esc(traduceTermen(p.departament || '-'))}</td>
                                                 <td>${esc(p.scadenta)}</td>
                                                 <td><span class="badge ${st.clasa}">${esc(st.text)}</span></td>
@@ -2121,9 +2116,9 @@
                 return;
             }
             const cel = v => String(v == null ? '' : v).replace(/[;\r\n]/g, ' ');
-            let csv = "﻿Tip;Denumire/Nume;Identificator ISCIR;CNP/Specificație;Scadență;Stare\r\n";
+            let csv = "﻿Tip;Denumire/Nume;Identificator ISCIR;Specificație;Scadență;Stare\r\n";
             db.echipamente.forEach(e => csv += `Echipament;${cel(e.descriere)};${cel(e.nrIscir)};${cel(e.spec || '-')};${cel(e.scadenta)};${cel(e.stare)}\r\n`);
-            db.personal.forEach(p => csv += `Personal;${cel(p.nume)};${cel(p.talon)};${cel(p.cnp || '-')};${cel(p.scadenta)};${cel(p.stare)}\r\n`);
+            db.personal.forEach(p => csv += `Personal;${cel(p.nume)};${cel(p.talon)};-;${cel(p.scadenta)};${cel(p.stare)}\r\n`);
 
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
             const a = document.createElement('a');

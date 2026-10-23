@@ -1,5 +1,5 @@
 /* RSVTI_P.M – Service Worker: funcționare offline + actualizare automată */
-const VERSIUNE = 'rsvti-pm-v18-1';
+const VERSIUNE = 'rsvti-pm-v18-2';
 const FISIERE = [
     './',
     './index.html',
