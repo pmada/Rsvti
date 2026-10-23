@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RSVTI_P.M</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Registru RSVTI - echipamente ISCIR și personal autorizat">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RSVTI_P.M">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #cbd5e1;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #16a34a;
+        }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); }
+
+        /* ECRAN LOGIN */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 16px;
+        }
+        .login-card {
+            background: #ffffff;
+            padding: 28px 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .login-badge {
+            background: var(--accent);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 1.35rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 18px 0;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .profile-box {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8fafc;
+            transition: all 0.15s;
+        }
+        .profile-box.active {
+            border-color: var(--accent);
+            background: #eff6ff;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+        .profile-icon { font-size: 1.8rem; }
+        .profile-name { font-weight: 700; font-size: 13px; color: var(--primary); margin-top: 4px; }
+        .profile-sub { font-size: 10.5px; color: var(--text-muted); }
+
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 6px;
+            outline: none;
+        }
+        .input-field:focus { border-color: var(--accent); }
+        .btn-connect {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 14px;
+        }
+        .btn-connect:hover { background: var(--accent-hover); }
+
+        .login-error {
+            display: none;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: var(--danger);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .login-sync-link {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+        }
+        .login-sync-link:hover { color: var(--accent); }
+
+        /* PANOU PRINCIPAL */
+        #appInterface { display: none; }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            padding-top: calc(12px + env(safe-area-inset-top));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .brand-title { font-size: 1.25rem; font-weight: bold; }
+        .user-pill {
+            background: #334155;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lang-selector {
+            background: #1e293b;
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .status-bar-backup {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 8px 20px;
+            font-size: 12.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #c7d2fe;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Indicator sincronizare */
+        .sync-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        .sync-pill.ok { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .sync-pill.busy { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .sync-pill.offline { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .sync-pill.error { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .sync-pill.off { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+
+        .nav-tabs {
+            background: white;
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            padding: 0 16px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 13px 18px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            font-size: 13.5px;
+        }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .main-container { max-width: 1400px; margin: 18px auto; padding: 0 16px; padding-bottom: env(safe-area-inset-bottom); }
+
+        .btn-act {
+            padding: 6px 11px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-act.primary { background: var(--accent); color: white; border: none; }
+        .btn-act.danger { background: var(--danger); color: white; border: none; }
+        .btn-act.success { background: var(--success); color: white; border: none; }
+        .btn-act.tag { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .btn-act:disabled { opacity: 0.6; cursor: wait; }
+
+        .grid-folders {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
+        }
+        .folder-tile {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.15s;
+        }
+        .folder-tile:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .folder-tile-content { display: flex; align-items: center; gap: 12px; }
+        .folder-tile-icon { font-size: 2.2rem; }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-top: 14px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f8fafc; padding: 11px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-muted); font-weight: 600; }
+        td { padding: 11px; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: #f8fafc; }
+
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .badge-ok { background: #dcfce7; color: #166534; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-gray { background: #f1f5f9; color: #64748b; }
+        .badge-state { background: #e0e7ff; color: #3730a3; margin-top: 3px; }
+
+        /* Modale */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 12px;
+        }
+        .modal-box {
+            background: white;
+            padding: 22px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 540px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .icon-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 6px;
+            background: #f8fafc;
+        }
+        .icon-tile-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            background: white;
+            transition: all 0.15s;
+        }
+        .icon-tile-item:hover { background: #eff6ff; border-color: #93c5fd; }
+        .icon-tile-item.selected { border-color: var(--accent); background: #dbeafe; font-weight: bold; }
+        .icon-tile-item .it-icon { font-size: 1.8rem; margin-bottom: 2px; }
+        .icon-tile-item .it-label { font-size: 10px; color: var(--text-muted); text-align: center; }
+
+        .sync-info-box { background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12.5px; color:#475569; line-height:1.5; margin-bottom:12px; }
+
+        /* Notificare scurtă (toast) */
+        #toastBox {
+            position: fixed;
+            left: 50%;
+            bottom: calc(20px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            z-index: 100000;
+            display: none;
+            max-width: calc(100% - 32px);
+            text-align: center;
+        }
+
+        /* Clasa care ascunde elementele de administrator când profilul e vizitator */
+        body.is-viewer .admin-only { display: none !important; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="is-viewer">
+
+    <!-- 1. ECRAN DE CONECTARE -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div style="text-align: center; margin-bottom: 6px;">
+                <span class="login-badge">🛡️ RSVTI_P.M</span>
+            </div>
+            <p id="lblLoginSubtitle" style="text-align:center; font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">Selectează profilul pentru autentificare</p>
+
+            <div class="profile-grid" id="containerProfileLogin"></div>
+
+            <input type="hidden" id="selectedUserId" value="u_admin">
+
+            <div id="passGroup">
+                <label id="lblPassPrompt" style="font-size: 12px; font-weight: bold; color: var(--text);">Parolă de acces:</label>
+                <input type="password" id="inputPassword" class="input-field" placeholder="Introduceți parola..." autocomplete="current-password">
+            </div>
+
+            <button type="button" class="btn-connect" id="btnConnectLabel" onclick="autentificareDirecta()">Conectare ➔</button>
+
+            <div id="loginErrorBox" class="login-error"></div>
+
+            <button type="button" class="login-sync-link" onclick="deschideModalSync()">☁️ <span id="lblLoginSync">Sincronizare între dispozitive</span>: <span id="lblLoginSyncState">-</span></button>
+        </div>
+    </div>
+
+    <!-- 2. PANOU PRINCIPAL -->
+    <div id="appInterface">
+        <header>
+            <div class="brand-title">🛡️ RSVTI_P.M</div>
+            <div style="display:flex; align-items:center; gap: 10px; flex-wrap:wrap;">
+                <select class="lang-selector" id="selAppLang" onchange="schimbaLimba(this.value)">
+                    <option value="ro">🇷🇴 Română (RO)</option>
+                    <option value="en">🇬🇧 English (EN)</option>
+                    <option value="fr">🇫🇷 Français (FR)</option>
+                </select>
+                <div class="user-pill">
+                    <span id="userIcon">👨‍💼</span> <span id="userName">Administrator</span> (<span id="userRoleTitle">Admin</span>)
+                </div>
+                <button class="btn-act hidden" id="btnInstallApp" style="background:#16a34a; color:white; border:none;" onclick="instaleazaAplicatia()">📲 <span id="btnLblInstall">Instalează aplicația</span></button>
+                <button class="btn-act" style="background:#475569; color:white; border:none;" onclick="deschideModalSync()">☁️ <span id="btnLblSync">Sincronizare</span></button>
+                <button class="btn-act admin-only" style="background:#475569; color:white; border:none;" onclick="deschideModalGestiuneUtilizatori()">👤 <span id="btnLblUserMgmt">Utilizatori & Parole</span></button>
+                <!-- Butonul de backup JSON marcat cu admin-only -->
+                <button class="btn-act admin-only" onclick="exportaBackupFisier()">💾 <span id="btnLblSaveBackup">Salvare Backup (JSON)</span></button>
+                <button class="btn-act danger" onclick="inchideSesiunea()"><span id="btnLblLogout">Deconectare</span></button>
+            </div>
+        </header>
+
+        <!-- Bară Informații Backup Săptămânal + stare sincronizare -->
+        <div class="status-bar-backup">
+            <div><strong><span id="lblSecTitle">Securitate Date:</span></strong> <span id="lblBackupStatus">Verificare backup săptămânal...</span><span id="syncPill" class="sync-pill off" onclick="sincronizeazaAcum()" title="Sincronizează acum">☁️ -</span></div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-act success admin-only" onclick="exportaExcelCSV()">Export Excel (CSV)</button>
+                <button class="btn-act admin-only" onclick="document.getElementById('fileBackupInput').click()"><span id="btnLblRestoreFile">Restaurare Fișier Backup</span></button>
+                <button class="btn-act admin-only" style="background:#fee2e2; color:#991b1b;" onclick="reseteazaLaBazaCompletaOriginala()"><span id="btnLblResetFull">Restaurare Bază Completă Originală</span></button>
+                <input type="file" id="fileBackupInput" accept=".json,application/json" style="display:none;" onchange="importaBackupFisier(event)">
+            </div>
+        </div>
+
+        <!-- Meniu Navigare -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" id="tabEq" onclick="comutaTab('echipamente')">📁 Echipamente ISCIR</button>
+            <button class="tab-btn" id="tabPers" onclick="comutaTab('personal')">👥 Personal Autorizat</button>
+            <button class="tab-btn" id="tabCal" onclick="comutaTab('calendar')">📅 Scadențe & Termene</button>
+            <button class="tab-btn" id="tabDoc" onclick="comutaTab('documentatie')">📚 Documentație & ISCIR.ro</button>
+        </nav>
+
+        <div class="main-container">
+            <div id="breadcrumbBar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;"></div>
+            <div id="mainContentZone"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITARE FOLDER -->
+    <div id="folderEditModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="lblFolderModalTitle" style="margin-bottom:12px;">Editare Categorie / Folder</h3>
+            <input type="hidden" id="editFolderId">
+            <div style="margin-bottom:10px;">
+                <label id="lblFolderNamePrompt" style="font-size:12px; font-weight:600;">Denumire Folder:</label>
+                <input type="text" id="inpFolderName" class="input-field" placeholder="ex: Stivuitoare Depozit">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label id="lblFolderIconPrompt" style="font-size:12px; font-weight:600;">Alege Pictogramă Echipament / Tehnică:</label>
+                <input type="text" id="inpSearchIcon" class="input-field" placeholder="🔍 Caută pictogramă..." oninput="filtreazaCatalogPictograme(this.value)">
+                <input type="hidden" id="selectedFolderIcon" value="📁">
+                <div class="icon-picker-grid" id="gridCatalogPictograme"></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+                <button class="btn-act" onclick="inchideModalFolder()"><span id="btnLblCancelFolder">Anulează</span></button>
+                <button class="btn-act primary" onclick="salveazaFolderModificat()"><span id="btnLblSaveFolder">Salvează Modificările</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SCHIMBARE ETICHETĂ -->
+    <div id="tagModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 440px;">
+            <h3 id="lblTagModalTitle" style="margin-bottom:10px;">🏷️ Schimbă Etichetă & Stare</h3>
+            <p id="tagItemDesc" style="font-size:13px; color:var(--text-muted); margin-bottom:12px;"></p>
+            <input type="hidden" id="tagItemId">
+            <div style="margin-bottom:14px;">
+                <label id="lblTagSelectPrompt" style="font-size:12px; font-weight:600;">Alege Starea / Eticheta:</label>
+                <select id="tagSelectValue" class="input-field" style="font-size:14px; padding:10px;"></select>
+            </div>
+            <div id="boxTagInfoNote" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; color:#475569; margin-bottom:14px; line-height:1.4;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn-act" onclick="inchideModalTag()"><span id="btnLblCancelTag">Anulează</span></button>
+                <button class="btn-act primary" onclick="aplicaEtichetaAutomata()"><span id="btnLblApplyTag">Aplică & Mută</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GESTIUNE UTILIZATORI & PAROLE -->
+    <div id="userMgmtModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="lblUserMgmtTitle" style="margin-bottom:14px;">👥 Gestiune Utilizatori & Securitate</h3>
+
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:16px;">
+                <h4 id="lblChangePassHeader" style="margin-bottom:8px; color:var(--primary);">🔑 Schimbă Parola Unui Cont</h4>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Alege Utilizatorul:</label>
+                    <select id="selUserChangePass" class="input-field"></select>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Parolă Nouă:</label>
+                    <input type="password" id="newPassValue" class="input-field" placeholder="Scrie noua parolă...">
+                </div>
+                <button class="btn-act primary" style="width:100%; margin-top:6px;" onclick="salveazaParolaNoua()">Actualizează Parola</button>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:16px;">
+                <h4 id="lblCreateUserHeader" style="margin-bottom:8px; color:var(--primary);">➕ Creare Utilizator Nou</h4>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Nume Complet:</label>
+                    <input type="text" id="newUserName" class="input-field" placeholder="ex: Tehnician Popescu">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Username (autentificare):</label>
+                    <input type="text" id="newUserLogin" class="input-field" placeholder="ex: tehnician1">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Rol Acces:</label>
+                    <select id="newUserRole" class="input-field">
+                        <option value="admin">Administrator (Acces complet)</option>
+                        <option value="viewer">Vizitator (Doar vizualizare)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Pictogramă Avatar:</label>
+                    <select id="newUserIcon" class="input-field">
+                        <option value="👨‍💼">👨‍💼 Administrator</option>
+                        <option value="👷">👷 Tehnician / Operator</option>
+                        <option value="👤">👤 Vizitator / Utilizator</option>
+                        <option value="👩‍💼">👩‍💼 Inspector RSVTI</option>
+                        <option value="🔧">🔧 Mentenanță Service</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:12px; font-weight:600;">Parolă Inițială:</label>
+                    <input type="password" id="newUserPass" class="input-field" placeholder="Setați parola...">
+                </div>
+                <button class="btn-act success" style="width:100%; margin-top:6px;" onclick="creeazaUtilizatorNou()">Creează Utilizatorul</button>
+            </div>
+
+            <div>
+                <h4 id="lblConfiguredUsersList" style="margin-bottom:8px; color:var(--primary);">📋 Utilizatori Înregistrați</h4>
+                <div id="listaUtilizatoriConfigurati" style="font-size:13px;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                <button class="btn-act" onclick="inchideModalUserMgmt()">Închide</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FORMULAR ADĂUGARE / EDITARE -->
+    <div id="modalBox" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modalTitle" style="margin-bottom:12px;">Înregistrare</h3>
+            <input type="hidden" id="editItemId">
+            <div id="modalFormContent"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                <button class="btn-act" onclick="inchideModal()"><span id="btnLblCancelEdit">Anulează</span></button>
+                <button class="btn-act primary" onclick="salveazaDateModal()"><span id="btnLblSaveEdit">Salvează Modificările</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SINCRONIZARE ÎNTRE DISPOZITIVE -->
+    <div id="syncModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin-bottom:12px;">☁️ <span id="lblSyncModalTitle">Sincronizare între dispozitive</span></h3>
+            <div class="sync-info-box" id="lblSyncHelp"></div>
+            <div style="margin-bottom:10px;" id="grpSyncUrl">
+                <label style="font-size:12px; font-weight:600;" id="lblSyncUrl">Adresa serverului (URL aplicație web Google Apps Script):</label>
+                <input type="url" id="inpSyncUrl" class="input-field" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:600;" id="lblSyncKey">Cheie de sincronizare:</label>
+                <input type="password" id="inpSyncKey" class="input-field" placeholder="ex: rsvti-7f3a..." autocomplete="off">
+            </div>
+            <div class="sync-info-box" style="margin-top:12px;">
+                <strong id="lblSyncStateTitle">Stare:</strong> <span id="lblSyncStateDetail">-</span>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; margin-top:14px;">
+                <button class="btn-act" onclick="copiazaLinkConfigurare()" id="btnCopySyncLink">🔗 <span id="btnLblCopyLink">Copiază link pentru alt dispozitiv</span></button>
+                <button class="btn-act" onclick="inchideModalSync()"><span id="btnLblCloseSync">Închide</span></button>
+                <button class="btn-act primary" id="btnSaveSync" onclick="salveazaConfigSync()"><span id="btnLblSaveSync">Salvează & Sincronizează</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastBox"></div>
+
+    <!-- JAVASCRIPT COMPLET -->
+    <script>
+        const catalogPictogrameTehnice = [
+            { icon: "🚜", label: "Stivuitor frontal", kw: "stivuitor forklift utilaj furci" },
+            { icon: "🛺", label: "Stivuitor retractabil", kw: "reach truck reachtruck stivuitor depozit" },
+            { icon: "🛒", label: "Transpaletă manuală", kw: "liza transpaleta manuala furci" },
+            { icon: "⚡🚜", label: "Transpaletă electrică", kw: "transpaleta electrica catarg veni" },
+            { icon: "🏗️", label: "Pod rulant", kw: "pod rulant macara grinda bigr konecranes" },
+            { icon: "🏢", label: "Macara portal", kw: "macara portal cale rulare picioare exterior" },
+            { icon: "🗼", label: "Macara turn", kw: "macara turn santier constructii" },
+            { icon: "⚙️", label: "Electropalan", kw: "electropalan palan stahl monorai cablu" },
+            { icon: "🦾", label: "Macara pivotantă", kw: "macara pivotanta consola brat" },
+            { icon: "🪝", label: "Cârlig & sarcină", kw: "carlig ridicare scripete cablu" },
+            { icon: "🪜", label: "Nacelă / PRB", kw: "nacela prb platforma ridicatoare foarfeca" },
+            { icon: "🛢️", label: "Acumulator presiune", kw: "rezervor presiune aer stocator recipient oks" },
+            { icon: "💨", label: "Compresor de aer", kw: "compresor aer motocompresor debit statie" },
+            { icon: "🏭", label: "Cazan de abur", kw: "cazan abur apa calda presiune centrala" },
+            { icon: "🔥", label: "Arzător cazan", kw: "arzator gaz foc flacara" },
+            { icon: "🧴", label: "Butelie / Recipient gaz", kw: "butelie gpl gaz azot recipient mobil" },
+            { icon: "🌡️", label: "Manometru / Supapă", kw: "manometru supapa siguranta presiune bar" },
+            { icon: "🔒", label: "Conservare / Scos uz", kw: "conservare oprit arhiva blocat" },
+            { icon: "🗑️", label: "Casat / Dezmembrat", kw: "casat fier vechi dezmembrare" },
+            { icon: "🏷️", label: "Vândut / Înstrăinat", kw: "vandut instrainat eticheta factura" },
+            { icon: "👷", label: "Stivuitorist", kw: "stivuitorist operator carist personal" },
+            { icon: "👷‍♂️", label: "Macaragiu", kw: "macaragiu pod masinist operator" },
+            { icon: "🦺", label: "Legător sarcină", kw: "legator sarcina vesta protectie" },
+            { icon: "👨‍🔧", label: "Inspector RSVTI", kw: "rsvti inginer tehnician inspector" },
+            { icon: "📁", label: "Arhivă / Lichidat", kw: "dosar folder arhiva lichidat" }
+        ];
+
+        const traduceriFoldereStandard = {
+            ro: {
+                f_pod_rulant: "Pod rulant",
+                f_macara: "Macara portal",
+                f_electropalan: "Electropalan",
+                f_stocator_aer: "Acumulator presiune / Rezervor",
+                f_motocompresor: "Compresor de aer",
+                f_stivuitor: "Stivuitor / Transpaletă",
+                f_conservare: "Conservare / Scos din uz",
+                f_casate: "Echipamente Casate",
+                f_vandute: "Echipamente Vândute",
+                f_stivuitoristi: "Stivuitoriști",
+                f_macaragii: "Macaragii / Mașinist pod",
+                f_legatori_sarcina: "Legători de sarcină",
+                f_lichidati: "Personal Lichidat"
+            },
+            en: {
+                f_pod_rulant: "Overhead Cranes",
+                f_macara: "Gantry Cranes",
+                f_electropalan: "Electric Hoists",
+                f_stocator_aer: "Pressure Vessels / Air Receivers",
+                f_motocompresor: "Air Compressors",
+                f_stivuitor: "Forklifts / Pallet Trucks",
+                f_conservare: "Preserved / Decommissioned",
+                f_casate: "Scrapped Equipment",
+                f_vandute: "Sold Equipment",
+                f_stivuitoristi: "Forklift Operators",
+                f_macaragii: "Crane Operators",
+                f_legatori_sarcina: "Slingers / Riggers",
+                f_lichidati: "Terminated Personnel"
+            },
+            fr: {
+                f_pod_rulant: "Ponts Roulants",
+                f_macara: "Grues Portiques",
+                f_electropalan: "Palans Électriques",
+                f_stocator_aer: "Réservoirs sous Pression / Cuves d'Air",
+                f_motocompresor: "Compresseurs d'Air",
+                f_stivuitor: "Chariots Élévateurs / Transpalettes",
+                f_conservare: "Consigné / Hors Service",
+                f_casate: "Équipements Mis au Rebut",
+                f_vandute: "Équipements Vendus",
+                f_stivuitoristi: "Caristes",
+                f_macaragii: "Pontiers / Grutiers",
+                f_legatori_sarcina: "Élingueurs / Accrocheurs",
+                f_lichidati: "Personnel Licencié / Parti"
+            }
+        };
+
+        const termeniGenerali = {
+            ro: {
+                "Magazioner": "Magazioner",
+                "Preparator materiale": "Preparator materiale",
+                "Carist": "Carist",
+                "Reglor": "Reglor",
+                "Sculer matriter": "Sculer matrițer",
+                "Montator matrite": "Montator matrițe",
+                "Injectie": "Injecție",
+                "Matriterie": "Matrițerie",
+                "Logistica": "Logistică",
+                "Tehnic": "Tehnic",
+                "Productie": "Producție",
+                "Compresoare": "Compresoare",
+                "Depozit": "Depozit",
+                "Centrala Termică": "Centrală Termică",
+                "În funcțiune": "În funcțiune",
+                "Conservare": "Conservare",
+                "Scos din uz": "Scos din uz",
+                "Casat": "Casat",
+                "Vândut": "Vândut",
+                "Activ": "Activ",
+                "Lichidat": "Lichidat",
+                "Suspendat": "Suspendat",
+                "POD RULANT": "POD RULANT",
+                "MACARA PORTAL": "MACARA PORTAL",
+                "ELECTROPALAN": "ELECTROPALAN",
+                "Stocator de aer": "Stocator de aer",
+                "Compresor": "Compresor"
+            },
+            en: {
+                "Magazioner": "Warehouse Worker",
+                "Preparator materiale": "Material Handler",
+                "Carist": "Forklift Driver",
+                "Reglor": "Tool Setter",
+                "Sculer matriter": "Tool & Die Maker",
+                "Montator matrite": "Die Fitter",
+                "Injectie": "Injection Moulding",
+                "Matriterie": "Tool Shop",
+                "Logistica": "Logistics",
+                "Tehnic": "Technical",
+                "Productie": "Production",
+                "Compresoare": "Compressor Room",
+                "Depozit": "Warehouse",
+                "Centrala Termică": "Boiler Room",
+                "În funcțiune": "In service",
+                "Conservare": "Preserved",
+                "Scos din uz": "Decommissioned",
+                "Casat": "Scrapped",
+                "Vândut": "Sold",
+                "Activ": "Active",
+                "Lichidat": "Terminated",
+                "Suspendat": "Suspended",
+                "POD RULANT": "OVERHEAD CRANE",
+                "MACARA PORTAL": "GANTRY CRANE",
+                "ELECTROPALAN": "ELECTRIC HOIST",
+                "Stocator de aer": "Air Receiver",
+                "Compresor": "Air Compressor"
+            },
+            fr: {
+                "Magazioner": "Magasinier",
+                "Preparator materiale": "Préparateur de Matières",
+                "Carist": "Cariste",
+                "Reglor": "Régleur",
+                "Sculer matriter": "Outilleur Mouliste",
+                "Montator matrite": "Monteur de Moules",
+                "Injectie": "Injection",
+                "Matriterie": "Atelier Moules",
+                "Logistica": "Logistique",
+                "Tehnic": "Technique",
+                "Productie": "Production",
+                "Compresoare": "Salle Compresseurs",
+                "Depozit": "Entrepôt",
+                "Centrala Termică": "Chaufferie",
+                "În funcțiune": "En service",
+                "Conservare": "Consignation",
+                "Scos din uz": "Hors service",
+                "Casat": "Mis au rebut",
+                "Vândut": "Vendu",
+                "Activ": "Actif",
+                "Lichidat": "Licencié",
+                "Suspendat": "Suspendu",
+                "POD RULANT": "PONT ROULANT",
+                "MACARA PORTAL": "GRUE PORTIQUE",
+                "ELECTROPALAN": "PALAN ÉLECTRIQUE",
+                "Stocator de aer": "Réservoir d'Air",
+                "Compresor": "Compresseur d'Air"
+            }
+        };
+
+        const i18n = {
+            ro: {
+                loginSub: "Selectează profilul pentru autentificare",
+                passPrompt: "Parolă de acces:",
+                connectBtn: "Conectare ➔",
+                wrongPass: "Parolă incorectă! Vă rugăm să reîncercați.",
+                tabEq: "📁 Echipamente ISCIR",
+                tabPers: "👥 Personal Autorizat",
+                tabCal: "📅 Scadențe & Termene",
+                tabDoc: "📚 Documentație & ISCIR.ro",
+                userMgmtBtn: "Utilizatori & Parole",
+                saveBackupBtn: "Salvare Backup (JSON)",
+                logoutBtn: "Deconectare",
+                secTitle: "Securitate Date:",
+                restoreFileBtn: "Restaurare Fișier Backup",
+                resetFullBtn: "Restaurare Bază Completă Originală",
+                addFolderBtn: "+ Folder Nou",
+                addItemBtn: "+ Adaugă Înregistrare",
+                backBtn: "⬅ Înapoi la Foldere",
+                syncCalBtn: "📅 Sincronizează cu Google Calendar",
+                syncCalSuccess: "Sincronizarea cu Google Calendar s-a realizat cu succes!",
+                recordsLabel: "înregistrări",
+                singleRecordLabel: "înregistrare",
+                noRecords: "Nu există înregistrări în această secțiune.",
+                editBtn: "Editează",
+                tagBtn: "🏷️ Etichetă",
+                delBtn: "Șterge",
+                cancelBtn: "Anulează",
+                saveBtn: "Salvează Modificările",
+                colDesc: "Descriere / Utilaj",
+                colMarca: "Marca & Model",
+                colSpec: "Specificație",
+                colIscir: "Nr. ISCIR",
+                colLoc: "Locație",
+                colScad: "Scadență VTP",
+                colStatus: "Status",
+                colActions: "Acțiuni",
+                colNume: "Nume și Prenume",
+                colFunc: "Funcție / Rol",
+                colTalon: "Autorizație / Talon",
+                colCnp: "CNP",
+                colDept: "Departament",
+                colScadTalon: "Scadență Talon",
+                daysRemaining: "zile rămase",
+                expiredText: "Expirat",
+                backupInitialSecured: "Baza este inițializată și protejată automat.",
+                backupUpdatedToday: "Backup săptămânal actualizat automat astăzi ({date}).",
+                backupScheduledIn: "Baza este protejată automat. Următorul backup programat peste {days} zile.",
+                tagRoutingNote: "🔄 <strong>Rutare automată inteligentă:</strong><br>• La <strong>Casat / Conservare / Vândut / Lichidat</strong> ➔ se mută automat în folderul specificat.<br>• La revenirea pe <strong>În funcțiune / Activ</strong> ➔ se întoarce automat în folderul natal de origine!",
+                syncBtn: "Sincronizare",
+                installBtn: "Instalează aplicația",
+                syncTitle: "Sincronizare între dispozitive",
+                syncOk: "Sincronizat {time}",
+                syncBusy: "Se sincronizează...",
+                syncOffline: "Offline – salvat local",
+                syncOfflinePending: "Offline – modificările se trimit automat la reconectare",
+                syncPending: "Modificări în așteptare",
+                syncError: "Eroare sincronizare",
+                syncOff: "Doar local (sincronizare neconfigurată)",
+                syncNever: "încă nesincronizat",
+                syncSaved: "Salvat automat",
+                syncHelp: "Datele se salvează <strong>automat</strong> pe acest dispozitiv la fiecare modificare și funcționează și <strong>fără internet</strong>. Când există conexiune, modificările se trimit automat pe server și apar pe toate dispozitivele (telefon, PC) conectate cu aceeași cheie.",
+                syncUrlLabel: "Adresa serverului (URL aplicație web Google Apps Script):",
+                syncKeyLabel: "Cheie de sincronizare:",
+                syncStateLabel: "Stare:",
+                syncSaveBtn: "Salvează & Sincronizează",
+                syncCloseBtn: "Închide",
+                syncCopyLink: "Copiază link pentru alt dispozitiv",
+                syncLinkCopied: "Link copiat! Deschideți-l pe celălalt dispozitiv pentru configurare automată.",
+                syncConfigured: "Sincronizare configurată cu succes!",
+                syncMissing: "Completați adresa serverului și cheia de sincronizare.",
+                syncUpdatedFromServer: "Date actualizate de pe alt dispozitiv",
+                syncLastLabel: "Ultima sincronizare:",
+                syncPendingLabel: "Modificări netrimise:",
+                yes: "da",
+                no: "nu"
+            },
+            en: {
+                loginSub: "Select profile to log in",
+                passPrompt: "Access password:",
+                connectBtn: "Sign In ➔",
+                wrongPass: "Incorrect password! Please try again.",
+                tabEq: "📁 ISCIR Equipment",
+                tabPers: "👥 Authorized Staff",
+                tabCal: "📅 Deadlines & Calendar",
+                tabDoc: "📚 Documentation & ISCIR.ro",
+                userMgmtBtn: "Users & Passwords",
+                saveBackupBtn: "Save Backup (JSON)",
+                logoutBtn: "Log Out",
+                secTitle: "Data Security:",
+                restoreFileBtn: "Restore Backup File",
+                resetFullBtn: "Restore Full Original Database",
+                addFolderBtn: "+ New Folder",
+                addItemBtn: "+ Add Record",
+                backBtn: "⬅ Back to Folders",
+                syncCalBtn: "📅 Sync to Google Calendar",
+                syncCalSuccess: "Synced to Google Calendar successfully!",
+                recordsLabel: "records",
+                singleRecordLabel: "record",
+                noRecords: "No records found in this section.",
+                editBtn: "Edit",
+                tagBtn: "🏷️ Tag",
+                delBtn: "Delete",
+                cancelBtn: "Cancel",
+                saveBtn: "Save Changes",
+                colDesc: "Description / Equipment",
+                colMarca: "Brand & Model",
+                colSpec: "Specification",
+                colIscir: "ISCIR Number",
+                colLoc: "Location",
+                colScad: "Expiry Date",
+                colStatus: "Status",
+                colActions: "Actions",
+                colNume: "Full Name",
+                colFunc: "Role / Qualification",
+                colTalon: "ISCIR Cert. / Badge",
+                colCnp: "ID Number",
+                colDept: "Department",
+                colScadTalon: "Badge Expiry",
+                daysRemaining: "days remaining",
+                expiredText: "Expired",
+                backupInitialSecured: "Database is initialized and protected automatically.",
+                backupUpdatedToday: "Weekly backup updated automatically today ({date}).",
+                backupScheduledIn: "Database is automatically protected. Next backup scheduled in {days} days.",
+                tagRoutingNote: "🔄 <strong>Smart automatic routing:</strong><br>• Marking as <strong>Scrapped / Preserved / Sold / Terminated</strong> ➔ moves automatically to that archive folder.<br>• Reverting to <strong>In service / Active</strong> ➔ returns automatically to original folder!",
+                syncBtn: "Sync",
+                installBtn: "Install app",
+                syncTitle: "Sync between devices",
+                syncOk: "Synced {time}",
+                syncBusy: "Syncing...",
+                syncOffline: "Offline – saved locally",
+                syncOfflinePending: "Offline – changes will be sent when back online",
+                syncPending: "Pending changes",
+                syncError: "Sync error",
+                syncOff: "Local only (sync not configured)",
+                syncNever: "not synced yet",
+                syncSaved: "Saved automatically",
+                syncHelp: "Data is saved <strong>automatically</strong> on this device after every change and works <strong>offline</strong>. When online, changes are sent to the server automatically and appear on every device (phone, PC) using the same key.",
+                syncUrlLabel: "Server address (Google Apps Script web app URL):",
+                syncKeyLabel: "Sync key:",
+                syncStateLabel: "Status:",
+                syncSaveBtn: "Save & Sync",
+                syncCloseBtn: "Close",
+                syncCopyLink: "Copy link for another device",
+                syncLinkCopied: "Link copied! Open it on the other device for automatic setup.",
+                syncConfigured: "Sync configured successfully!",
+                syncMissing: "Fill in the server address and the sync key.",
+                syncUpdatedFromServer: "Data updated from another device",
+                syncLastLabel: "Last sync:",
+                syncPendingLabel: "Unsent changes:",
+                yes: "yes",
+                no: "no"
+            },
+            fr: {
+                loginSub: "Sélectionnez le profil pour vous connecter",
+                passPrompt: "Mot de passe d'accès :",
+                connectBtn: "Connexion ➔",
+                wrongPass: "Mot de passe incorrect ! Veuillez réessayer.",
+                tabEq: "📁 Équipements ISCIR",
+                tabPers: "👥 Personnel Autorisé",
+                tabCal: "📅 Échéances & Calendrier",
+                tabDoc: "📚 Documentation & ISCIR.ro",
+                userMgmtBtn: "Utilisateurs & Mots de passe",
+                saveBackupBtn: "Sauvegarder (JSON)",
+                logoutBtn: "Déconnexion",
+                secTitle: "Sécurité Données :",
+                restoreFileBtn: "Restaurer Fichier Sauvegarde",
+                resetFullBtn: "Restaurer Base Complète d'Origine",
+                addFolderBtn: "+ Nouveau Dossier",
+                addItemBtn: "+ Ajouter Enregistrement",
+                backBtn: "⬅ Retour aux Dossiers",
+                syncCalBtn: "📅 Synchroniser Google Calendar",
+                syncCalSuccess: "Synchronisation Google Calendar réussie !",
+                recordsLabel: "enregistrements",
+                singleRecordLabel: "enregistrement",
+                noRecords: "Aucun enregistrement dans cette section.",
+                editBtn: "Modifier",
+                tagBtn: "🏷️ Étiquette",
+                delBtn: "Supprimer",
+                cancelBtn: "Annuler",
+                saveBtn: "Enregistrer Modifications",
+                colDesc: "Description / Équipement",
+                colMarca: "Marque & Modèle",
+                colSpec: "Spécification",
+                colIscir: "Numéro ISCIR",
+                colLoc: "Emplacement",
+                colScad: "Échéance VTP",
+                colStatus: "Statut",
+                colActions: "Actions",
+                colNume: "Nom et Prénom",
+                colFunc: "Fonction / Rôle",
+                colTalon: "Autorisation ISCIR",
+                colCnp: "Identifiant",
+                colDept: "Département",
+                colScadTalon: "Échéance Carte",
+                daysRemaining: "jours restants",
+                expiredText: "Expiré",
+                backupInitialSecured: "La base est initialisée et protégée automatiquement.",
+                backupUpdatedToday: "Sauvegarde hebdomadaire mise à jour aujourd'hui ({date}).",
+                backupScheduledIn: "La base est protégée automatiquement. Prochaine sauvegarde dans {days} jours.",
+                tagRoutingNote: "🔄 <strong>Routage automatique intelligent :</strong><br>• Statut <strong>Mis au rebut / Consignation / Vendu / Licencié</strong> ➔ transfert automatique vers le dossier d'archive.<br>• Retour à <strong>En service / Actif</strong> ➔ retour automatique au dossier d'origine !",
+                syncBtn: "Synchronisation",
+                installBtn: "Installer l'application",
+                syncTitle: "Synchronisation entre appareils",
+                syncOk: "Synchronisé {time}",
+                syncBusy: "Synchronisation...",
+                syncOffline: "Hors ligne – enregistré localement",
+                syncOfflinePending: "Hors ligne – modifications envoyées à la reconnexion",
+                syncPending: "Modifications en attente",
+                syncError: "Erreur de synchronisation",
+                syncOff: "Local uniquement (synchronisation non configurée)",
+                syncNever: "pas encore synchronisé",
+                syncSaved: "Enregistré automatiquement",
+                syncHelp: "Les données sont enregistrées <strong>automatiquement</strong> sur cet appareil à chaque modification et fonctionnent <strong>hors ligne</strong>. Une fois en ligne, les modifications sont envoyées automatiquement au serveur et apparaissent sur tous les appareils (téléphone, PC) utilisant la même clé.",
+                syncUrlLabel: "Adresse du serveur (URL de l'application web Google Apps Script) :",
+                syncKeyLabel: "Clé de synchronisation :",
+                syncStateLabel: "Statut :",
+                syncSaveBtn: "Enregistrer & Synchroniser",
+                syncCloseBtn: "Fermer",
+                syncCopyLink: "Copier le lien pour un autre appareil",
+                syncLinkCopied: "Lien copié ! Ouvrez-le sur l'autre appareil pour une configuration automatique.",
+                syncConfigured: "Synchronisation configurée avec succès !",
+                syncMissing: "Renseignez l'adresse du serveur et la clé de synchronisation.",
+                syncUpdatedFromServer: "Données mises à jour depuis un autre appareil",
+                syncLastLabel: "Dernière synchronisation :",
+                syncPendingLabel: "Modifications non envoyées :",
+                yes: "oui",
+                no: "non"
+            }
+        };
+
+        // ============================================================
+        // CONFIGURARE SINCRONIZARE (opțional)
+        // Completați aici URL-ul aplicației web Google Apps Script (.../exec)
+        // ca să nu mai trebuiască introdus pe fiecare dispozitiv.
+        // ============================================================
+        const SYNC_URL_IMPLICIT = '';
+
+        const CHEIE_DB = 'RSVTI_PM_DATA_SECURE_V17';
+        const CHEIE_SYNC_CFG = 'RSVTI_SYNC_CONFIG';
+        const CHEIE_SYNC_DIRTY = 'RSVTI_SYNC_DIRTY';
+        const CHEIE_SYNC_LAST = 'RSVTI_SYNC_LAST';
+        const CHEIE_LIMBA = 'RSVTI_LANG';
+        const COLECTII = ['utilizatori', 'foldere', 'echipamente', 'personal'];
+        const INTERVAL_VERIFICARE_MS = 30000;
+
+        let currentLang = 'ro';
+        const memCache = {};
+        function safeSet(k, v) {
+            try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch(e) { memCache[k] = v; }
+        }
+        function safeGet(k) {
+            try {
+                const val = localStorage.getItem(k);
+                return val ? JSON.parse(val) : (memCache[k] || null);
+            } catch(e) { return memCache[k] || null; }
+        }
+
+        let currentUser = null;
+        let currentTab = 'echipamente';
+        let currentFolderId = null;
+
+        // Structura de pornire (foldere + profiluri). Datele complete (echipamente, personal, parole)
+        // NU sunt incluse în pagina publică: vin de pe serverul Google la prima sincronizare.
+        function genereazaBazaDeDateCompleta() {
+            return JSON.parse(JSON.stringify({
+              "utilizatori": [
+                {
+                  "id": "u_admin",
+                  "user": "admin",
+                  "pass": "",
+                  "rol": "admin",
+                  "nume": "Administrator",
+                  "icon": "👨‍💼"
+                },
+                {
+                  "id": "u_viewer",
+                  "user": "vizitator",
+                  "pass": "",
+                  "rol": "viewer",
+                  "nume": "Vizitator",
+                  "icon": "👤"
+                }
+              ],
+              "foldere": [
+                {
+                  "id": "f_pod_rulant",
+                  "modul": "echipamente",
+                  "nume": "Pod rulant",
+                  "icon": "🏗️"
+                },
+                {
+                  "id": "f_macara",
+                  "modul": "echipamente",
+                  "nume": "Macara portal",
+                  "icon": "🏢"
+                },
+                {
+                  "id": "f_electropalan",
+                  "modul": "echipamente",
+                  "nume": "Electropalan",
+                  "icon": "⚙️"
+                },
+                {
+                  "id": "f_stocator_aer",
+                  "modul": "echipamente",
+                  "nume": "Acumulator presiune / Rezervor",
+                  "icon": "🛢️"
+                },
+                {
+                  "id": "f_motocompresor",
+                  "modul": "echipamente",
+                  "nume": "Compresor de aer",
+                  "icon": "💨"
+                },
+                {
+                  "id": "f_stivuitor",
+                  "modul": "echipamente",
+                  "nume": "Stivuitor / Transpaletă",
+                  "icon": "🚜"
+                },
+                {
+                  "id": "f_conservare",
+                  "modul": "echipamente",
+                  "nume": "Conservare / Scos din uz",
+                  "icon": "🔒"
+                },
+                {
+                  "id": "f_casate",
+                  "modul": "echipamente",
+                  "nume": "Echipamente Casate",
+                  "icon": "🗑️"
+                },
+                {
+                  "id": "f_vandute",
+                  "modul": "echipamente",
+                  "nume": "Echipamente Vândute",
+                  "icon": "🏷️"
+                },
+                {
+                  "id": "f_stivuitoristi",
+                  "modul": "personal",
+                  "nume": "Stivuitoriști",
+                  "icon": "👷"
+                },
+                {
+                  "id": "f_macaragii",
+                  "modul": "personal",
+                  "nume": "Macaragii / Mașinist pod",
+                  "icon": "👷‍♂️"
+                },
+                {
+                  "id": "f_legatori_sarcina",
+                  "modul": "personal",
+                  "nume": "Legători de sarcină",
+                  "icon": "🦺"
+                },
+                {
+                  "id": "f_lichidati",
+                  "modul": "personal",
+                  "nume": "Personal Lichidat",
+                  "icon": "📁"
+                }
+              ],
+              "echipamente": [],
+              "personal": []
+            }));
+        }
+
+        // ============================================================
+        // AUTOSALVARE + COMBINARE DATE ÎNTRE DISPOZITIVE
+        // Fiecare înregistrare primește marca de timp "_upd" la modificare,
+        // iar ștergerile sunt păstrate în "_sterse" ca să se propage și pe
+        // celelalte dispozitive. La combinare câștigă varianta cea mai nouă.
+        // ============================================================
+        function combinaBaze(a, b) {
+            // b (de regulă serverul) câștigă la egalitate
+            a = a || {}; b = b || {};
+            const sterse = Object.assign({}, a._sterse || {});
+            Object.keys(b._sterse || {}).forEach(k => {
+                if (!(sterse[k] >= b._sterse[k])) sterse[k] = b._sterse[k];
+            });
+            const rez = { _sterse: sterse };
+            COLECTII.forEach(c => {
+                const harta = new Map();
+                const ordine = [];
+                (b[c] || []).forEach(r => {
+                    if (!r || !r.id || harta.has(r.id)) return;
+                    harta.set(r.id, r); ordine.push(r.id);
+                });
+                (a[c] || []).forEach(r => {
+                    if (!r || !r.id) return;
+                    const existent = harta.get(r.id);
+                    if (!existent) { harta.set(r.id, r); ordine.push(r.id); }
+                    else if ((r._upd || 0) > (existent._upd || 0)) harta.set(r.id, r);
+                });
+                rez[c] = ordine.map(id => harta.get(id)).filter(r => {
+                    const t = sterse[c + ':' + r.id];
+                    return !(t && t >= (r._upd || 0));
+                });
+            });
+            return rez;
+        }
+
+        let db = genereazaBazaDeDateCompleta();
+        let instantaneu = {};
+        let contorModificari = 0;
+
+        function amprentaRec(r) {
+            const copie = Object.assign({}, r);
+            delete copie._upd;
+            return JSON.stringify(copie);
+        }
+
+        function refaInstantaneu() {
+            instantaneu = {};
+            COLECTII.forEach(c => (db[c] || []).forEach(r => { instantaneu[c + ':' + r.id] = amprentaRec(r); }));
+        }
+
+        function normalizeazaBaza(baza) {
+            const rez = baza || {};
+            COLECTII.forEach(c => { if (!Array.isArray(rez[c])) rez[c] = []; });
+            if (!rez._sterse || typeof rez._sterse !== 'object') rez._sterse = {};
+            return rez;
+        }
+
+        // Salvare automată: marchează ce s-a schimbat, scrie local și programează trimiterea pe server
+        function salveaza() {
+            const acum = Date.now();
+            normalizeazaBaza(db);
+            let schimbat = false;
+            const vazute = new Set();
+            COLECTII.forEach(c => db[c].forEach(r => {
+                const k = c + ':' + r.id;
+                vazute.add(k);
+                if (instantaneu[k] !== amprentaRec(r)) {
+                    r._upd = acum;
+                    delete db._sterse[k];
+                    schimbat = true;
+                }
+            }));
+            Object.keys(instantaneu).forEach(k => {
+                if (!vazute.has(k)) { db._sterse[k] = acum; schimbat = true; }
+            });
+            refaInstantaneu();
+            safeSet(CHEIE_DB, db);
+            if (schimbat) {
+                contorModificari++;
+                safeSet(CHEIE_SYNC_DIRTY, true);
+                arataToast('💾 ' + i18n[currentLang].syncSaved);
+                programeazaSincronizare(1200);
+            }
+            actualizeazaIndicatorSync();
+        }
+
+        // Înlocuiește complet conținutul (restaurare backup / bază originală) și propagă și pe celelalte dispozitive
+        function inlocuiesteBaza(bazaNoua) {
+            const acum = Date.now();
+            const noua = normalizeazaBaza(JSON.parse(JSON.stringify(bazaNoua)));
+            const ids = new Set();
+            COLECTII.forEach(c => noua[c].forEach(r => { r._upd = acum; ids.add(c + ':' + r.id); }));
+            const sterse = Object.assign({}, (db && db._sterse) || {}, noua._sterse || {});
+            Object.keys(instantaneu).forEach(k => { if (!ids.has(k)) sterse[k] = acum; });
+            ids.forEach(k => delete sterse[k]);
+            noua._sterse = sterse;
+            db = noua;
+            refaInstantaneu();
+            safeSet(CHEIE_DB, db);
+            contorModificari++;
+            safeSet(CHEIE_SYNC_DIRTY, true);
+            programeazaSincronizare(300);
+            actualizeazaIndicatorSync();
+        }
+
+        function bazaValida(b) {
+            return b && typeof b === 'object' && (Array.isArray(b.echipamente) || Array.isArray(b.personal));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            preiaConfigurareDinLink();
+
+            const salvat = safeGet(CHEIE_DB);
+            if (bazaValida(salvat)) {
+                // Date salvate de versiunea veche (fără sincronizare): le marcăm ca modificate local,
+                // ca să aibă prioritate față de baza inițială de pe server
+                if (!salvat._sterse) COLECTII.forEach(c => (salvat[c] || []).forEach(r => { if (!r._upd) r._upd = 1; }));
+                db = normalizeazaBaza(salvat);
+                if (!db.utilizatori || db.utilizatori.length === 0) {
+                    db.utilizatori = genereazaBazaDeDateCompleta().utilizatori;
+                }
+            } else {
+                db = normalizeazaBaza(genereazaBazaDeDateCompleta());
+                safeSet(CHEIE_DB, db);
+            }
+            refaInstantaneu();
+
+            document.getElementById('inputPassword').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') autentificareDirecta();
+            });
+
+            const userSalvat = safeGet('RSVTI_ACTIVE_USER');
+            const userValid = userSalvat && db.utilizatori.find(u => u.id === userSalvat.id);
+            if (userValid) {
+                deschideAplicatia(userValid);
+            } else {
+                construiesteGridProfiluriLogin();
+            }
+
+            schimbaLimba(safeGet(CHEIE_LIMBA) || 'ro');
+            initializeazaSincronizare();
+        });
+
+        function getNumeFolderTradus(folder) {
+            if (!folder) return "";
+            if (traduceriFoldereStandard[currentLang] && traduceriFoldereStandard[currentLang][folder.id]) {
+                return traduceriFoldereStandard[currentLang][folder.id];
+            }
+            return folder.nume;
+        }
+
+        function traduceTermen(text) {
+            if (!text) return "";
+            const dict = termeniGenerali[currentLang];
+            if (dict && dict[text]) {
+                return dict[text];
+            }
+            return text;
+        }
+
+        // Protecție la afișarea textelor introduse de utilizator în HTML
+        function esc(v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function schimbaLimba(lang) {
+            if (!i18n[lang]) return;
+            currentLang = lang;
+            safeSet(CHEIE_LIMBA, lang);
+            const t = i18n[lang];
+
+            document.documentElement.lang = lang;
+            document.getElementById('selAppLang').value = lang;
+            document.getElementById('lblLoginSubtitle').innerText = t.loginSub;
+            document.getElementById('lblPassPrompt').innerText = t.passPrompt;
+            document.getElementById('btnConnectLabel').innerText = t.connectBtn;
+
+            document.getElementById('tabEq').innerText = t.tabEq;
+            document.getElementById('tabPers').innerText = t.tabPers;
+            document.getElementById('tabCal').innerText = t.tabCal;
+            document.getElementById('tabDoc').innerText = t.tabDoc;
+
+            document.getElementById('btnLblUserMgmt').innerText = t.userMgmtBtn;
+            document.getElementById('btnLblSaveBackup').innerText = t.saveBackupBtn;
+            document.getElementById('btnLblLogout').innerText = t.logoutBtn;
+            document.getElementById('lblSecTitle').innerText = t.secTitle;
+            document.getElementById('btnLblRestoreFile').innerText = t.restoreFileBtn;
+            document.getElementById('btnLblResetFull').innerText = t.resetFullBtn;
+
+            document.getElementById('boxTagInfoNote').innerHTML = t.tagRoutingNote;
+            document.getElementById('btnLblCancelTag').innerText = t.cancelBtn;
+            document.getElementById('btnLblApplyTag').innerText = t.saveBtn;
+            document.getElementById('btnLblCancelFolder').innerText = t.cancelBtn;
+            document.getElementById('btnLblSaveFolder').innerText = t.saveBtn;
+            document.getElementById('btnLblCancelEdit').innerText = t.cancelBtn;
+            document.getElementById('btnLblSaveEdit').innerText = t.saveBtn;
+
+            document.getElementById('btnLblSync').innerText = t.syncBtn;
+            document.getElementById('btnLblInstall').innerText = t.installBtn;
+            document.getElementById('lblLoginSync').innerText = t.syncTitle;
+            document.getElementById('lblSyncModalTitle').innerText = t.syncTitle;
+            document.getElementById('lblSyncHelp').innerHTML = t.syncHelp;
+            document.getElementById('lblSyncUrl').innerText = t.syncUrlLabel;
+            document.getElementById('lblSyncKey').innerText = t.syncKeyLabel;
+            document.getElementById('lblSyncStateTitle').innerText = t.syncStateLabel;
+            document.getElementById('btnLblSaveSync').innerText = t.syncSaveBtn;
+            document.getElementById('btnLblCloseSync').innerText = t.syncCloseBtn;
+            document.getElementById('btnLblCopyLink').innerText = t.syncCopyLink;
+
+            verificaBackupSaptamanal();
+            actualizeazaIndicatorSync();
+            randeazaInterfata();
+        }
+
+        function construiesteGridProfiluriLogin() {
+            const container = document.getElementById('containerProfileLogin');
+            container.innerHTML = '';
+
+            db.utilizatori.forEach((u, index) => {
+                const div = document.createElement('div');
+                div.className = `profile-box ${index === 0 ? 'active' : ''}`;
+                div.id = `prof_card_${u.id}`;
+                div.innerHTML = `
+                    <div class="profile-icon">${esc(u.icon || '👤')}</div>
+                    <div class="profile-name">${esc(u.nume)}</div>
+                    <div class="profile-sub">${u.rol === 'admin' ? 'Administrator' : 'Vizitator'}</div>
+                `;
+                div.onclick = () => selecteazaProfilUtilizator(u.id);
+                container.appendChild(div);
+            });
+
+            const firstUser = db.utilizatori[0];
+            if (firstUser) selecteazaProfilUtilizator(firstUser.id);
+        }
+
+        function selecteazaProfilUtilizator(id) {
+            document.querySelectorAll('.profile-box').forEach(el => el.classList.remove('active'));
+            const card = document.getElementById(`prof_card_${id}`);
+            if (card) card.classList.add('active');
+
+            document.getElementById('selectedUserId').value = id;
+            const user = db.utilizatori.find(u => u.id === id);
+            const passGroup = document.getElementById('passGroup');
+            const errBox = document.getElementById('loginErrorBox');
+            errBox.style.display = 'none';
+
+            if (user && user.pass && user.pass.trim() !== '') {
+                passGroup.style.display = 'block';
+                document.getElementById('inputPassword').value = '';
+                document.getElementById('inputPassword').focus();
+            } else {
+                passGroup.style.display = 'none';
+            }
+        }
+
+        function autentificareDirecta() {
+            const errBox = document.getElementById('loginErrorBox');
+            errBox.style.display = 'none';
+            errBox.innerText = '';
+
+            const id = document.getElementById('selectedUserId').value;
+            const user = db.utilizatori.find(u => u.id === id);
+
+            if (!user) {
+                errBox.innerText = 'Utilizatorul nu a fost găsit!';
+                errBox.style.display = 'block';
+                return;
+            }
+
+            if (user.pass && user.pass.trim() !== '') {
+                const p = document.getElementById('inputPassword').value.trim();
+                if (p !== user.pass) {
+                    errBox.innerText = i18n[currentLang].wrongPass;
+                    errBox.style.display = 'block';
+                    document.getElementById('inputPassword').focus();
+                    return;
+                }
+            }
+
+            currentUser = user;
+            safeSet('RSVTI_ACTIVE_USER', { id: user.id });
+            deschideAplicatia(user);
+        }
+
+        function deschideAplicatia(user) {
+            currentUser = user;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appInterface').style.display = 'block';
+
+            document.getElementById('userName').innerText = user.nume;
+            document.getElementById('userRoleTitle').innerText = (user.rol === 'admin') ? 'Admin' : 'Vizitator';
+            document.getElementById('userIcon').innerText = user.icon || '👨‍💼';
+            // Controlul claselor CSS pentru elementele rezervate exclusiv administratorului
+            if (user.rol === 'admin') {
+                document.body.classList.remove('is-viewer');
+            } else {
+                document.body.classList.add('is-viewer');
+            }
+
+            verificaBackupSaptamanal();
+            randeazaInterfata();
+        }
+
+        function inchideSesiunea() {
+            safeSet('RSVTI_ACTIVE_USER', null);
+            currentUser = null;
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('appInterface').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.body.classList.add('is-viewer');
+            construiesteGridProfiluriLogin();
+        }
+
+        function deschideModalEditareFolder(idFolder) {
+            document.getElementById('editFolderId').value = idFolder || '';
+            const inpSearch = document.getElementById('inpSearchIcon');
+            inpSearch.value = '';
+
+            if (idFolder) {
+                const folder = db.foldere.find(f => f.id === idFolder);
+                document.getElementById('inpFolderName').value = folder ? getNumeFolderTradus(folder) : '';
+                document.getElementById('selectedFolderIcon').value = folder ? folder.icon : '📁';
+                document.getElementById('lblFolderModalTitle').innerText = currentLang === 'en' ? "Edit Folder / Category" : (currentLang === 'fr' ? "Modifier Dossier / Catégorie" : "Editare Categorie / Folder");
+            } else {
+                document.getElementById('inpFolderName').value = '';
+                document.getElementById('selectedFolderIcon').value = currentTab === 'echipamente' ? '🚜' : '👷';
+                document.getElementById('lblFolderModalTitle').innerText = currentLang === 'en' ? "+ Add New Folder" : (currentLang === 'fr' ? "+ Ajouter Nouveau Dossier" : "+ Adăugare Folder Nou");
+            }
+
+            filtreazaCatalogPictograme('');
+            document.getElementById('folderEditModal').style.display = 'flex';
+        }
+
+        function inchideModalFolder() {
+            document.getElementById('folderEditModal').style.display = 'none';
+        }
+
+        function filtreazaCatalogPictograme(cautare) {
+            const grid = document.getElementById('gridCatalogPictograme');
+            grid.innerHTML = '';
+            const iconCurenta = document.getElementById('selectedFolderIcon').value;
+            const q = (cautare || '').toLowerCase().trim();
+
+            const filtrate = catalogPictogrameTehnice.filter(p => !q || p.label.toLowerCase().includes(q) || p.kw.includes(q));
+
+            filtrate.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `icon-tile-item ${p.icon === iconCurenta ? 'selected' : ''}`;
+                div.innerHTML = `<span class="it-icon">${p.icon}</span><span class="it-label">${p.label}</span>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.icon-tile-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    document.getElementById('selectedFolderIcon').value = p.icon;
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        function salveazaFolderModificat() {
+            const idFolder = document.getElementById('editFolderId').value;
+            const nume = document.getElementById('inpFolderName').value.trim();
+            const icon = document.getElementById('selectedFolderIcon').value || '📁';
+
+            if (!nume) return alert('Introduceți denumirea folderului!');
+
+            if (idFolder) {
+                const folder = db.foldere.find(f => f.id === idFolder);
+                if (folder) {
+                    folder.nume = nume;
+                    folder.icon = icon;
+                }
+            } else {
+                db.foldere.push({
+                    id: "f_" + Date.now(),
+                    modul: currentTab,
+                    nume: nume,
+                    icon: icon
+                });
+            }
+
+            salveaza();
+            inchideModalFolder();
+            randeazaInterfata();
+        }
+
+        function deschideModalEticheta(id) {
+            const item = db[currentTab].find(x => x.id === id);
+            if (!item) return;
+            document.getElementById('tagItemId').value = id;
+            const folderOrig = db.foldere.find(f => f.id === (item.folderOrigineId || item.folderId));
+            const numeOrig = folderOrig ? getNumeFolderTradus(folderOrig) : "Folder natal";
+
+            const lblOrig = currentLang === 'en' ? 'Original Folder:' : (currentLang === 'fr' ? 'Dossier d\'origine :' : 'Folder natal:');
+            const descriereText = currentTab === 'echipamente'
+                ? `<strong>${esc(traduceTermen(item.descriere))}</strong> (${esc(item.nrIscir)})<br><small style="color:#64748b;">${lblOrig} <strong>${esc(numeOrig)}</strong></small>`
+                : `<strong>${esc(item.nume)}</strong> (${esc(traduceTermen(item.functie))})<br><small style="color:#64748b;">${lblOrig} <strong>${esc(numeOrig)}</strong></small>`;
+            document.getElementById('tagItemDesc').innerHTML = descriereText;
+
+            const sel = document.getElementById('tagSelectValue');
+            sel.innerHTML = '';
+
+            let optiuni = [];
+            if (currentTab === 'echipamente') {
+                optiuni = [
+                    { val: "În funcțiune", text: `🟢 ${traduceTermen("În funcțiune")} (➔ ${numeOrig})` },
+                    { val: "Conservare", text: `🔒 ${traduceTermen("Conservare")}` },
+                    { val: "Scos din uz", text: `⛔ ${traduceTermen("Scos din uz")}` },
+                    { val: "Casat", text: `🗑️ ${traduceTermen("Casat")}` },
+                    { val: "Vândut", text: `🏷️ ${traduceTermen("Vândut")}` }
+                ];
+            } else {
+                optiuni = [
+                    { val: "Activ", text: `🟢 ${traduceTermen("Activ")} (➔ ${numeOrig})` },
+                    { val: "Lichidat", text: `📁 ${traduceTermen("Lichidat")}` },
+                    { val: "Suspendat", text: `⏸️ ${traduceTermen("Suspendat")}` }
+                ];
+            }
+
+            optiuni.forEach(o => {
+                const el = document.createElement('option');
+                el.value = o.val;
+                el.innerText = o.text;
+                if (item.stare === o.val) el.selected = true;
+                sel.appendChild(el);
+            });
+
+            document.getElementById('tagModal').style.display = 'flex';
+        }
+
+        function inchideModalTag() {
+            document.getElementById('tagModal').style.display = 'none';
+        }
+
+        function aplicaEtichetaAutomata() {
+            const id = document.getElementById('tagItemId').value;
+            const etichetaNoua = document.getElementById('tagSelectValue').value;
+            const item = db[currentTab].find(x => x.id === id);
+            if (!item) return;
+
+            if (!item.folderOrigineId) {
+                item.folderOrigineId = item.folderId;
+            }
+
+            item.stare = etichetaNoua;
+
+            if (currentTab === 'echipamente') {
+                if (etichetaNoua === 'În funcțiune') {
+                    item.folderId = item.folderOrigineId || 'f_pod_rulant';
+                } else if (etichetaNoua === 'Casat') {
+                    item.folderId = 'f_casate';
+                } else if (etichetaNoua === 'Conservare' || etichetaNoua === 'Scos din uz') {
+                    item.folderId = 'f_conservare';
+                } else if (etichetaNoua === 'Vândut') {
+                    item.folderId = 'f_vandute';
+                }
+            } else if (currentTab === 'personal') {
+                if (etichetaNoua === 'Activ') {
+                    item.folderId = item.folderOrigineId || 'f_stivuitoristi';
+                } else if (etichetaNoua === 'Lichidat') {
+                    item.folderId = 'f_lichidati';
+                }
+            }
+
+            salveaza();
+            inchideModalTag();
+            randeazaInterfata();
+        }
+
+        function deschideModalAdaugare() {
+            document.getElementById('editItemId').value = '';
+            document.getElementById('modalTitle').innerText = i18n[currentLang].addItemBtn;
+            construiesteCampuriFormular({});
+            document.getElementById('modalBox').style.display = 'flex';
+        }
+
+        function deschideModalEditeaza(id) {
+            const item = db[currentTab].find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('editItemId').value = id;
+            document.getElementById('modalTitle').innerText = i18n[currentLang].editBtn;
+            construiesteCampuriFormular(item);
+            document.getElementById('modalBox').style.display = 'flex';
+        }
+
+        function construiesteCampuriFormular(item) {
+            const form = document.getElementById('modalFormContent');
+            const t = i18n[currentLang];
+            if (currentTab === 'echipamente') {
+                form.innerHTML = `
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colDesc}:</label><input id="m_desc" class="input-field" value="${esc(item.descriere)}" placeholder="ex: Pod rulant, Stivuitor"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colMarca}:</label><input id="m_marca" class="input-field" value="${esc(item.marca)}" placeholder="ex: Konecranes, GD"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">Model / Serie:</label><input id="m_model" class="input-field" value="${esc(item.model)}" placeholder="ex: CXTD 2141268"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colSpec}:</label><input id="m_spec" class="input-field" value="${esc(item.spec)}" placeholder="ex: 16 tone, 11 bar"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colIscir}:</label><input id="m_nr" class="input-field" value="${esc(item.nrIscir)}" placeholder="ex: ORMAC 100879"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colLoc}:</label><input id="m_loc" class="input-field" value="${esc(item.locatie)}" placeholder="ex: Hala 1, Injectie"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colScad}:</label><input type="date" id="m_scad" class="input-field" value="${esc(item.scadenta)}"></div>
+                `;
+            } else {
+                form.innerHTML = `
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colNume}:</label><input id="m_nume" class="input-field" value="${esc(item.nume)}" placeholder="ex: Popescu Ioan"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colFunc}:</label><input id="m_func" class="input-field" value="${esc(item.functie)}" placeholder="ex: Stivuitorist, Macaragiu"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colTalon}:</label><input id="m_talon" class="input-field" value="${esc(item.talon)}" placeholder="ex: C_61C_047498"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colCnp}:</label><input id="m_cnp" class="input-field" value="${esc(item.cnp)}" placeholder="ex: 1850918055085"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colDept}:</label><input id="m_dept" class="input-field" value="${esc(item.departament)}" placeholder="ex: Logistica, Tehnic"></div>
+                    <div style="margin-bottom:8px;"><label style="font-size:12px; font-weight:600;">${t.colScadTalon}:</label><input type="date" id="m_scad" class="input-field" value="${esc(item.scadenta)}"></div>
+                `;
+            }
+        }
+
+        function salveazaDateModal() {
+            const editId = document.getElementById('editItemId').value;
+
+            if (currentTab === 'echipamente') {
+                const desc = document.getElementById('m_desc').value.trim();
+                const nr = document.getElementById('m_nr').value.trim();
+                const scad = document.getElementById('m_scad').value;
+                if (!desc || !nr || !scad) return alert("Completați descrierea, numărul ISCIR și scadența!");
+
+                if (editId) {
+                    const item = db.echipamente.find(x => x.id === editId);
+                    if (item) {
+                        item.descriere = desc;
+                        item.marca = document.getElementById('m_marca').value.trim();
+                        item.model = document.getElementById('m_model').value.trim();
+                        item.spec = document.getElementById('m_spec').value.trim();
+                        item.nrIscir = nr;
+                        item.locatie = document.getElementById('m_loc').value.trim();
+                        item.scadenta = scad;
+                    }
+                } else {
+                    db.echipamente.push({
+                        id: "EQ_" + Date.now(),
+                        folderId: currentFolderId,
+                        folderOrigineId: currentFolderId,
+                        descriere: desc,
+                        marca: document.getElementById('m_marca').value.trim(),
+                        model: document.getElementById('m_model').value.trim(),
+                        spec: document.getElementById('m_spec').value.trim(),
+                        nrIscir: nr,
+                        locatie: document.getElementById('m_loc').value.trim(),
+                        scadenta: scad,
+                        stare: "În funcțiune"
+                    });
+                }
+            } else {
+                const nume = document.getElementById('m_nume').value.trim();
+                const talon = document.getElementById('m_talon').value.trim();
+                const scad = document.getElementById('m_scad').value;
+                if (!nume || !talon || !scad) return alert("Completați numele, numărul de talon și scadența!");
+
+                if (editId) {
+                    const item = db.personal.find(x => x.id === editId);
+                    if (item) {
+                        item.nume = nume;
+                        item.functie = document.getElementById('m_func').value.trim();
+                        item.talon = talon;
+                        item.cnp = document.getElementById('m_cnp').value.trim();
+                        item.departament = document.getElementById('m_dept').value.trim();
+                        item.scadenta = scad;
+                    }
+                } else {
+                    db.personal.push({
+                        id: "P_" + Date.now(),
+                        folderId: currentFolderId,
+                        folderOrigineId: currentFolderId,
+                        nume: nume,
+                        functie: document.getElementById('m_func').value.trim(),
+                        talon: talon,
+                        cnp: document.getElementById('m_cnp').value.trim(),
+                        departament: document.getElementById('m_dept').value.trim(),
+                        scadenta: scad,
+                        stare: "Activ"
+                    });
+                }
+            }
+
+            salveaza();
+            inchideModal();
+            randeazaInterfata();
+        }
+
+        function inchideModal() {
+            document.getElementById('modalBox').style.display = 'none';
+        }
+
+        function executaSincronizareCalendar(ev) {
+            const btn = ev.currentTarget;
+            const t = i18n[currentLang];
+            const cfg = getConfigSync();
+            if (!cfg.key || (!cfg.url && !esteInAppsScript())) {
+                alert(t.syncMissing);
+                deschideModalSync();
+                return;
+            }
+            btn.innerText = "⏳ Sincronizare...";
+            btn.disabled = true;
+
+            apelServer({ action: 'calendar' }).then(res => {
+                btn.innerText = t.syncCalBtn;
+                btn.disabled = false;
+                if (res && res.succes) {
+                    alert(`${t.syncCalSuccess} (${res.count} ${t.recordsLabel}).`);
+                } else {
+                    alert("Eroare la sincronizare: " + ((res && res.eroare) || "Necunoscută"));
+                }
+            }).catch(err => {
+                btn.innerText = t.syncCalBtn;
+                btn.disabled = false;
+                alert("Eroare server: " + err.message);
+            });
+        }
+
+        function deschideModalGestiuneUtilizatori() {
+            const sel = document.getElementById('selUserChangePass');
+            sel.innerHTML = '';
+            db.utilizatori.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.innerText = `${u.nume} (${u.user}) - [${u.rol}]`;
+                sel.appendChild(opt);
+            });
+            document.getElementById('newPassValue').value = '';
+
+            randeazaListaUtilizatoriConfigurati();
+            document.getElementById('userMgmtModal').style.display = 'flex';
+        }
+
+        function inchideModalUserMgmt() {
+            document.getElementById('userMgmtModal').style.display = 'none';
+        }
+
+        function salveazaParolaNoua() {
+            const id = document.getElementById('selUserChangePass').value;
+            const newP = document.getElementById('newPassValue').value.trim();
+            if (!newP) return alert('Introduceți o nouă parolă validă!');
+
+            const u = db.utilizatori.find(x => x.id === id);
+            if (u) {
+                u.pass = newP;
+                salveaza();
+                alert(`Parola pentru utilizatorul "${u.nume}" a fost actualizată cu succes!`);
+                document.getElementById('newPassValue').value = '';
+            }
+        }
+
+        function creeazaUtilizatorNou() {
+            const nume = document.getElementById('newUserName').value.trim();
+            const login = document.getElementById('newUserLogin').value.trim().toLowerCase();
+            const rol = document.getElementById('newUserRole').value;
+            const icon = document.getElementById('newUserIcon').value;
+            const pass = document.getElementById('newUserPass').value.trim();
+
+            if (!nume || !login) return alert('Completați numele și username-ul!');
+
+            if (db.utilizatori.some(u => u.user.toLowerCase() === login)) {
+                return alert('Acest username există deja! Alegeți altul.');
+            }
+
+            db.utilizatori.push({
+                id: "u_" + Date.now(),
+                user: login,
+                pass: pass,
+                rol: rol,
+                nume: nume,
+                icon: icon
+            });
+
+            salveaza();
+            alert(`Utilizatorul "${nume}" a fost creat cu succes!`);
+
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserLogin').value = '';
+            document.getElementById('newUserPass').value = '';
+
+            deschideModalGestiuneUtilizatori();
+        }
+
+        function randeazaListaUtilizatoriConfigurati() {
+            const container = document.getElementById('listaUtilizatoriConfigurati');
+            container.innerHTML = '';
+
+            db.utilizatori.forEach(u => {
+                const div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '8px 10px';
+                div.style.borderBottom = '1px solid #e2e8f0';
+
+                div.innerHTML = `
+                    <div>
+                        <strong>${esc(u.icon || '👤')} ${esc(u.nume)}</strong> <span style="color:#64748b; font-size:12px;">(@${esc(u.user)}) [${esc(u.rol)}]</span>
+                    </div>
+                    <div>
+                        ${u.user === 'admin' ? '<small style="color:#64748b;">Cont protejat</small>' : `<button class="btn-act danger" onclick="stergeUtilizator('${esc(u.id)}')">Șterge</button>`}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function stergeUtilizator(id) {
+            if (confirm('Sigur doriți să ștergeți acest cont?')) {
+                db.utilizatori = db.utilizatori.filter(u => u.id !== id);
+                salveaza();
+                randeazaListaUtilizatoriConfigurati();
+            }
+        }
+
+        function reseteazaLaBazaCompletaOriginala() {
+            if (!syncConfigurata() || !navigator.onLine) {
+                alert("Baza completă originală se descarcă de pe server. Configurați sincronizarea (☁️) și verificați conexiunea la internet.");
+                return;
+            }
+            if (confirm("Sigur doriți să reîncărcați baza completă cu toate echipamentele și persoanele autorizate?\n\nAtenție: modificarea se va aplica și pe celelalte dispozitive sincronizate.")) {
+                apelServer({ action: 'original' }).then(res => {
+                    if (!res || !res.succes || !bazaValida(res.db)) throw new Error((res && res.eroare) || 'Răspuns invalid');
+                    inlocuiesteBaza(res.db);
+                    randeazaInterfata();
+                    alert("Baza de date completă a fost restaurată cu succes!");
+                }).catch(err => alert("Eroare server: " + err.message));
+            }
+        }
+
+        function verificaBackupSaptamanal() {
+            const now = new Date().getTime();
+            const last = safeGet('RSVTI_LAST_BACKUP_TIMESTAMP');
+            const label = document.getElementById('lblBackupStatus');
+            const t = i18n[currentLang];
+
+            if (!last) {
+                safeSet('RSVTI_LAST_BACKUP_TIMESTAMP', now);
+                safeSet('RSVTI_BACKUP_SNAPSHOT_WEEKLY', db);
+                label.innerText = t.backupInitialSecured;
+                return;
+            }
+
+            const diffZile = (now - parseInt(last, 10)) / (1000 * 60 * 60 * 24);
+
+            if (diffZile >= 7) {
+                safeSet('RSVTI_LAST_BACKUP_TIMESTAMP', now);
+                safeSet('RSVTI_BACKUP_SNAPSHOT_WEEKLY', db);
+                label.innerText = t.backupUpdatedToday.replace('{date}', new Date().toLocaleDateString());
+            } else {
+                const zileRamase = Math.ceil(7 - diffZile);
+                label.innerText = t.backupScheduledIn.replace('{days}', zileRamase);
+            }
+        }
+
+        // Fără câmpurile tehnice de sincronizare, în formatul original al backup-ului
+        function bazaPentruExport() {
+            const rez = {};
+            COLECTII.forEach(c => {
+                rez[c] = (db[c] || []).map(r => { const copie = Object.assign({}, r); delete copie._upd; return copie; });
+            });
+            return rez;
+        }
+
+        // Funcția de salvare securizată: permisă exclusiv pentru administrator
+        function exportaBackupFisier() {
+            if (!currentUser || currentUser.rol !== 'admin') {
+                alert("Acces refuzat: Doar administratorul are permisiunea de a descărca fișierul de backup JSON!");
+                return;
+            }
+
+            const blob = new Blob([JSON.stringify(bazaPentruExport(), null, 2)], { type: "application/json;charset=utf-8" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "Backup_RSVTI_Complet_" + new Date().toISOString().slice(0, 10) + ".json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        }
+
+        function importaBackupFisier(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const importat = JSON.parse(evt.target.result);
+                    if (bazaValida(importat)) {
+                        if (!Array.isArray(importat.utilizatori) || importat.utilizatori.length === 0) {
+                            importat.utilizatori = db.utilizatori;
+                        }
+                        if (!Array.isArray(importat.foldere) || importat.foldere.length === 0) {
+                            importat.foldere = db.foldere;
+                        }
+                        delete importat._sterse;
+                        inlocuiesteBaza(importat);
+                        randeazaInterfata();
+                        alert("Baza de date a fost restaurată cu succes!");
+                    } else {
+                        alert("Fișierul JSON nu este conform!");
+                    }
+                } catch(err) {
+                    alert("Eroare la citirea fișierului de backup!");
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function comutaTab(tab) {
+            currentTab = tab;
+            currentFolderId = null;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (tab === 'echipamente') document.getElementById('tabEq').classList.add('active');
+            if (tab === 'personal') document.getElementById('tabPers').classList.add('active');
+            if (tab === 'calendar') document.getElementById('tabCal').classList.add('active');
+            if (tab === 'documentatie') document.getElementById('tabDoc').classList.add('active');
+            randeazaInterfata();
+        }
+
+        function calculeazaTermen(dataStr, stare) {
+            const t = i18n[currentLang];
+            if (['Conservare', 'Casat', 'Scos din uz', 'Vândut', 'Lichidat'].includes(stare)) {
+                return { text: traduceTermen(stare), clasa: "badge-gray" };
+            }
+            if (!dataStr) return { text: "-", clasa: "" };
+            const azi = new Date();
+            azi.setHours(0,0,0,0);
+            const tinta = new Date(dataStr + 'T00:00:00');
+            const diff = Math.round((tinta - azi) / (1000 * 60 * 60 * 24));
+
+            if (diff < 0) return { text: `${t.expiredText} (${Math.abs(diff)}z)`, clasa: "badge-danger" };
+            if (diff <= 30) return { text: `${diff} ${t.daysRemaining}`, clasa: "badge-warn" };
+            return { text: `${diff} ${t.daysRemaining}`, clasa: "badge-ok" };
+        }
+
+        function randeazaInterfata() {
+            const breadcrumb = document.getElementById('breadcrumbBar');
+            const content = document.getElementById('mainContentZone');
+            const t = i18n[currentLang];
+
+            if (currentTab === 'calendar') {
+                breadcrumb.innerHTML = `
+                    <h3>${t.tabCal}</h3>
+                    <button class="btn-act primary admin-only" onclick="executaSincronizareCalendar(event)">${t.syncCalBtn}</button>
+                `;
+                let lista = [];
+                db.echipamente.forEach(e => lista.push({ titlu: e.descriere, info: `${e.marca} - ${e.nrIscir}`, data: e.scadenta, stare: e.stare, tip: "Echipament" }));
+                db.personal.forEach(p => lista.push({ titlu: p.nume, info: `${p.functie} (${p.talon})`, data: p.scadenta, stare: p.stare, tip: "Personal" }));
+                lista.sort((a,b) => new Date(a.data) - new Date(b.data));
+
+                content.innerHTML = `
+                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                        ${lista.map(item => {
+                            const st = calculeazaTermen(item.data, item.stare);
+                            return `
+                                <div style="background:white; padding:16px; border-radius:8px; border:1px solid var(--border); border-left: 4px solid var(--accent);">
+                                    <div style="display:flex; justify-content:space-between;"><small>${esc(traduceTermen(item.tip))}</small><span class="badge ${st.clasa}">${esc(st.text)}</span></div>
+                                    <h4 style="margin:8px 0 4px 0;">${esc(traduceTermen(item.titlu))}</h4>
+                                    <div style="font-size:12px; color:var(--text-muted);">${esc(item.info)}</div>
+                                    <div style="margin-top:10px; font-weight:bold; font-size:13px;">${t.colScad}: ${esc(item.data)}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentTab === 'documentatie') {
+                breadcrumb.innerHTML = `<h3>${t.tabDoc}</h3>`;
+                content.innerHTML = `
+                    <div style="background:white; padding:20px; border-radius:8px; border:1px solid var(--border);">
+                        <h4>Portal ISCIR România</h4>
+                        <p style="margin:8px 0 16px 0; color:var(--text-muted);">${currentLang === 'en' ? 'Up-to-date legislation, technical standards PT R1-2010, PT C4-2010, Law 64/2008:' : (currentLang === 'fr' ? 'Législation actualisée, normes techniques PT R1-2010, PT C4-2010, Loi 64/2008 :' : 'Legislație actualizată, prescripții tehnice PT R1-2010, PT C4-2010, Legea 64/2008:')}</p>
+                        <a href="https://iscir.ro" target="_blank" rel="noopener" class="btn-act primary" style="text-decoration:none; display:inline-block;">Deschide ISCIR.RO ↗</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const folder = currentFolderId ? db.foldere.find(f => f.id === currentFolderId) : null;
+            if (currentFolderId && !folder) currentFolderId = null; // folderul a fost șters pe alt dispozitiv
+
+            if (!currentFolderId) {
+                breadcrumb.innerHTML = `
+                    <h3>${currentTab === 'echipamente' ? t.tabEq : t.tabPers}</h3>
+                    <button class="btn-act primary admin-only" onclick="deschideModalEditareFolder(null)">${t.addFolderBtn}</button>
+                `;
+                const foldere = db.foldere.filter(f => f.modul === currentTab);
+                content.innerHTML = `
+                    <div class="grid-folders">
+                        ${foldere.map(f => {
+                            const count = (db[currentTab] || []).filter(x => x.folderId === f.id).length;
+                            const etichetaInregistrari = count === 1 ? t.singleRecordLabel : t.recordsLabel;
+                            return `
+                                <div class="folder-tile" onclick="deschideFolder('${esc(f.id)}')">
+                                    <div class="folder-tile-content">
+                                        <span class="folder-tile-icon">${esc(f.icon || '📁')}</span>
+                                        <div>
+                                            <strong style="font-size:14.5px;">${esc(getNumeFolderTradus(f))}</strong>
+                                            <div style="font-size:12px; color:var(--text-muted);">${count} ${etichetaInregistrari}</div>
+                                        </div>
+                                    </div>
+                                    <div class="admin-only" onclick="event.stopPropagation();">
+                                        <button class="btn-act" title="${t.editBtn}" onclick="deschideModalEditareFolder('${esc(f.id)}')">✏️</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                breadcrumb.innerHTML = `
+                    <div>
+                        <button class="btn-act" onclick="inchideFolder()">${t.backBtn}</button>
+                        <strong style="margin-left: 10px; font-size:15px;">${esc(folder.icon + ' ' + getNumeFolderTradus(folder))}</strong>
+                        <button class="btn-act admin-only" style="margin-left: 8px;" onclick="deschideModalEditareFolder('${esc(folder.id)}')">✏️</button>
+                    </div>
+                    <button class="btn-act primary admin-only" onclick="deschideModalAdaugare()">${t.addItemBtn}</button>
+                `;
+
+                if (currentTab === 'echipamente') {
+                    const items = db.echipamente.filter(e => e.folderId === currentFolderId);
+                    content.innerHTML = `
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr><th>${t.colDesc}</th><th>${t.colMarca}</th><th>${t.colSpec}</th><th>${t.colIscir}</th><th>${t.colLoc}</th><th>${t.colScad}</th><th>${t.colStatus}</th><th class="admin-only">${t.colActions}</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${items.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:16px;">${t.noRecords}</td></tr>` : ''}
+                                    ${items.map(e => {
+                                        const st = calculeazaTermen(e.scadenta, e.stare);
+                                        return `
+                                            <tr>
+                                                <td><strong>${esc(traduceTermen(e.descriere))}</strong><div><span class="badge badge-state">${esc(traduceTermen(e.stare || 'În funcțiune'))}</span></div></td>
+                                                <td>${esc(e.marca)}<br><small style="color:var(--text-muted);">${esc(e.model)}</small></td>
+                                                <td><small>${esc(e.spec || '-')}</small></td>
+                                                <td><code>${esc(e.nrIscir)}</code></td>
+                                                <td>${esc(traduceTermen(e.locatie || '-'))}</td>
+                                                <td>${esc(e.scadenta)}</td>
+                                                <td><span class="badge ${st.clasa}">${esc(st.text)}</span></td>
+                                                <td class="admin-only" style="white-space:nowrap;">
+                                                    <button class="btn-act primary" onclick="deschideModalEditeaza('${esc(e.id)}')">${t.editBtn}</button>
+                                                    <button class="btn-act tag" onclick="deschideModalEticheta('${esc(e.id)}')">${t.tagBtn}</button>
+                                                    <button class="btn-act danger" onclick="stergeElement('${esc(e.id)}')">${t.delBtn}</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    const items = db.personal.filter(p => p.folderId === currentFolderId);
+                    content.innerHTML = `
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr><th>${t.colNume}</th><th>${t.colFunc}</th><th>${t.colTalon}</th><th>${t.colCnp}</th><th>${t.colDept}</th><th>${t.colScadTalon}</th><th>${t.colStatus}</th><th class="admin-only">${t.colActions}</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${items.length === 0 ? `<tr><td colspan="8" style="text-align:center; padding:16px;">${t.noRecords}</td></tr>` : ''}
+                                    ${items.map(p => {
+                                        const st = calculeazaTermen(p.scadenta, p.stare);
+                                        return `
+                                            <tr>
+                                                <td><strong>${esc(p.nume)}</strong><div><span class="badge badge-state">${esc(traduceTermen(p.stare || 'Activ'))}</span></div></td>
+                                                <td>${esc(traduceTermen(p.functie))}</td>
+                                                <td><code>${esc(p.talon)}</code></td>
+                                                <td><small>${esc(p.cnp)}</small></td>
+                                                <td>${esc(traduceTermen(p.departament || '-'))}</td>
+                                                <td>${esc(p.scadenta)}</td>
+                                                <td><span class="badge ${st.clasa}">${esc(st.text)}</span></td>
+                                                <td class="admin-only" style="white-space:nowrap;">
+                                                    <button class="btn-act primary" onclick="deschideModalEditeaza('${esc(p.id)}')">${t.editBtn}</button>
+                                                    <button class="btn-act tag" onclick="deschideModalEticheta('${esc(p.id)}')">${t.tagBtn}</button>
+                                                    <button class="btn-act danger" onclick="stergeElement('${esc(p.id)}')">${t.delBtn}</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function deschideFolder(id) { currentFolderId = id; randeazaInterfata(); }
+        function inchideFolder() { currentFolderId = null; randeazaInterfata(); }
+
+        function stergeElement(id) {
+            if (confirm("Sigur doriți să ștergeți această înregistrare?")) {
+                db[currentTab] = db[currentTab].filter(x => x.id !== id);
+                salveaza();
+                randeazaInterfata();
+            }
+        }
+
+        function exportaExcelCSV() {
+            if (!currentUser || currentUser.rol !== 'admin') {
+                alert("Acces refuzat: Doar administratorul poate exporta fișiere CSV!");
+                return;
+            }
+            const cel = v => String(v == null ? '' : v).replace(/[;\r\n]/g, ' ');
+            let csv = "﻿Tip;Denumire/Nume;Identificator ISCIR;CNP/Specificație;Scadență;Stare\r\n";
+            db.echipamente.forEach(e => csv += `Echipament;${cel(e.descriere)};${cel(e.nrIscir)};${cel(e.spec || '-')};${cel(e.scadenta)};${cel(e.stare)}\r\n`);
+            db.personal.forEach(p => csv += `Personal;${cel(p.nume)};${cel(p.talon)};${cel(p.cnp || '-')};${cel(p.scadenta)};${cel(p.stare)}\r\n`);
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "Registru_RSVTI_" + new Date().toISOString().slice(0, 10) + ".csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        }
+
+        // ============================================================
+        // SINCRONIZARE AUTOMATĂ CU SERVERUL (Google Apps Script)
+        // ============================================================
+        let syncInCurs = false;
+        let syncDeRepetat = false;
+        let syncTimer = null;
+        let stareSync = 'off';     // off | ok | busy | offline | error
+        let eroareSync = '';
+
+        function esteInAppsScript() {
+            return typeof google !== 'undefined' && google.script && google.script.run;
+        }
+
+        function getConfigSync() {
+            const cfg = safeGet(CHEIE_SYNC_CFG) || {};
+            return { url: (cfg.url || SYNC_URL_IMPLICIT || '').trim(), key: (cfg.key || '').trim() };
+        }
+
+        function syncConfigurata() {
+            const cfg = getConfigSync();
+            return !!(cfg.key && (cfg.url || esteInAppsScript()));
+        }
+
+        // Permite configurarea rapidă a unui dispozitiv nou printr-un link: ...#sync=URL&key=CHEIE
+        function preiaConfigurareDinLink() {
+            try {
+                if (!location.hash || location.hash.indexOf('key=') === -1) return;
+                const p = new URLSearchParams(location.hash.slice(1));
+                const key = p.get('key');
+                const url = p.get('sync');
+                if (key) {
+                    safeSet(CHEIE_SYNC_CFG, { url: url || getConfigSync().url, key: key });
+                }
+                history.replaceState(null, '', location.pathname + location.search);
+            } catch (e) { /* ignorat */ }
+        }
+
+        function apelServer(payload) {
+            const cfg = getConfigSync();
+            const cerere = Object.assign({ key: cfg.key }, payload);
+            if (esteInAppsScript()) {
+                return new Promise((resolve, reject) => {
+                    google.script.run
+                        .withSuccessHandler(r => { try { resolve(typeof r === 'string' ? JSON.parse(r) : r); } catch (e) { reject(e); } })
+                        .withFailureHandler(reject)
+                        .apiRsvti(JSON.stringify(cerere));
+                });
+            }
+            const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const timer = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
+            // Corp text/plain => fără cerere CORS preliminară, compatibil cu Google Apps Script
+            return fetch(cfg.url, {
+                method: 'POST',
+                body: JSON.stringify(cerere),
+                redirect: 'follow',
+                cache: 'no-store',
+                signal: ctrl ? ctrl.signal : undefined
+            }).then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).finally(() => { if (timer) clearTimeout(timer); });
+        }
+
+        function programeazaSincronizare(intarziere) {
+            clearTimeout(syncTimer);
+            syncTimer = setTimeout(sincronizeaza, intarziere || 0);
+        }
+
+        function sincronizeazaAcum() {
+            if (!syncConfigurata()) { deschideModalSync(); return; }
+            programeazaSincronizare(0);
+        }
+
+        async function sincronizeaza() {
+            if (!syncConfigurata()) { stareSync = 'off'; actualizeazaIndicatorSync(); return; }
+            if (!navigator.onLine) { stareSync = 'offline'; actualizeazaIndicatorSync(); return; }
+            if (syncInCurs) { syncDeRepetat = true; return; }
+
+            syncInCurs = true;
+            stareSync = 'busy';
+            actualizeazaIndicatorSync();
+            const versiuneTrimisa = contorModificari;
+            const amprentaInainte = JSON.stringify(bazaPentruExport());
+
+            try {
+                const res = await apelServer({ action: 'sync', db: db });
+                if (!res || !res.succes || !res.db) throw new Error((res && res.eroare) || 'Răspuns invalid de la server');
+
+                // Modificările făcute local în timpul cererii au marcă de timp mai nouă și sunt păstrate
+                db = normalizeazaBaza(combinaBaze(db, res.db));
+                refaInstantaneu();
+                safeSet(CHEIE_DB, db);
+                if (contorModificari === versiuneTrimisa) safeSet(CHEIE_SYNC_DIRTY, false);
+                safeSet(CHEIE_SYNC_LAST, Date.now());
+                stareSync = 'ok';
+                eroareSync = '';
+
+                if (JSON.stringify(bazaPentruExport()) !== amprentaInainte) {
+                    aplicaDateActualizate();
+                }
+            } catch (err) {
+                stareSync = navigator.onLine ? 'error' : 'offline';
+                eroareSync = (err && err.name === 'AbortError') ? 'Timeout' : ((err && err.message) || String(err));
+            } finally {
+                syncInCurs = false;
+                actualizeazaIndicatorSync();
+                if (syncDeRepetat || (safeGet(CHEIE_SYNC_DIRTY) && contorModificari !== versiuneTrimisa)) {
+                    syncDeRepetat = false;
+                    programeazaSincronizare(500);
+                }
+            }
+        }
+
+        // Reîmprospătează ecranul după ce au venit date noi de pe alt dispozitiv
+        function aplicaDateActualizate() {
+            if (currentUser) {
+                const actualizat = db.utilizatori.find(u => u.id === currentUser.id);
+                if (!actualizat) { inchideSesiunea(); return; }
+                currentUser = actualizat;
+                document.getElementById('userName').innerText = actualizat.nume;
+                document.getElementById('userIcon').innerText = actualizat.icon || '👨‍💼';
+                randeazaInterfata();
+                arataToast('🔄 ' + i18n[currentLang].syncUpdatedFromServer);
+            } else {
+                const selectat = document.getElementById('selectedUserId').value;
+                construiesteGridProfiluriLogin();
+                if (db.utilizatori.some(u => u.id === selectat)) selecteazaProfilUtilizator(selectat);
+            }
+        }
+
+        function textStareSync() {
+            const t = i18n[currentLang];
+            const inAsteptare = !!safeGet(CHEIE_SYNC_DIRTY);
+            if (!syncConfigurata()) return { cls: 'off', text: '💾 ' + t.syncOff };
+            if (!navigator.onLine) return { cls: 'offline', text: '📴 ' + (inAsteptare ? t.syncOfflinePending : t.syncOffline) };
+            if (stareSync === 'busy') return { cls: 'busy', text: '⏳ ' + t.syncBusy };
+            if (stareSync === 'error') return { cls: 'error', text: '⚠️ ' + t.syncError };
+            if (inAsteptare) return { cls: 'busy', text: '⏳ ' + t.syncPending };
+            const last = safeGet(CHEIE_SYNC_LAST);
+            const ora = last ? new Date(last).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            return last ? { cls: 'ok', text: '✅ ' + t.syncOk.replace('{time}', ora) } : { cls: 'busy', text: '⏳ ' + t.syncNever };
+        }
+
+        function actualizeazaIndicatorSync() {
+            const s = textStareSync();
+            const pill = document.getElementById('syncPill');
+            if (pill) { pill.className = 'sync-pill ' + s.cls; pill.innerText = s.text; pill.title = eroareSync || ''; }
+            const lbl = document.getElementById('lblLoginSyncState');
+            if (lbl) lbl.innerText = s.text;
+
+            const det = document.getElementById('lblSyncStateDetail');
+            if (det) {
+                const t = i18n[currentLang];
+                const last = safeGet(CHEIE_SYNC_LAST);
+                det.innerHTML = `${esc(s.text)}<br>${esc(t.syncLastLabel)} ${last ? esc(new Date(last).toLocaleString()) : '-'}<br>${esc(t.syncPendingLabel)} ${safeGet(CHEIE_SYNC_DIRTY) ? t.yes : t.no}` + (eroareSync && stareSync === 'error' ? `<br><span style="color:var(--danger);">${esc(eroareSync)}</span>` : '');
+            }
+        }
+
+        function deschideModalSync() {
+            const cfg = getConfigSync();
+            document.getElementById('inpSyncUrl').value = cfg.url;
+            document.getElementById('inpSyncKey').value = cfg.key;
+            document.getElementById('grpSyncUrl').style.display = esteInAppsScript() ? 'none' : 'block';
+            actualizeazaIndicatorSync();
+            document.getElementById('syncModal').style.display = 'flex';
+        }
+
+        function inchideModalSync() {
+            document.getElementById('syncModal').style.display = 'none';
+        }
+
+        async function salveazaConfigSync() {
+            const t = i18n[currentLang];
+            const url = document.getElementById('inpSyncUrl').value.trim();
+            const key = document.getElementById('inpSyncKey').value.trim();
+            if (!key || (!url && !esteInAppsScript())) { alert(t.syncMissing); return; }
+            safeSet(CHEIE_SYNC_CFG, { url: url, key: key });
+            const btn = document.getElementById('btnSaveSync');
+            btn.disabled = true;
+            await sincronizeaza();
+            btn.disabled = false;
+            if (stareSync === 'ok') {
+                arataToast('✅ ' + t.syncConfigured);
+                inchideModalSync();
+            }
+        }
+
+        function copiazaLinkConfigurare() {
+            const t = i18n[currentLang];
+            const cfg = getConfigSync();
+            if (!cfg.key || !cfg.url) { alert(t.syncMissing); return; }
+            const link = location.origin + location.pathname + '#sync=' + encodeURIComponent(cfg.url) + '&key=' + encodeURIComponent(cfg.key);
+            const gata = () => arataToast('🔗 ' + t.syncLinkCopied);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(gata).catch(() => prompt(t.syncCopyLink, link));
+            } else {
+                prompt(t.syncCopyLink, link);
+            }
+        }
+
+        let toastTimer = null;
+        function arataToast(text) {
+            const box = document.getElementById('toastBox');
+            box.innerText = text;
+            box.style.display = 'block';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { box.style.display = 'none'; }, 2200);
+        }
+
+        function initializeazaSincronizare() {
+            window.addEventListener('online', () => { actualizeazaIndicatorSync(); programeazaSincronizare(500); });
+            window.addEventListener('offline', () => { stareSync = 'offline'; actualizeazaIndicatorSync(); });
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') programeazaSincronizare(200);
+            });
+            window.addEventListener('focus', () => programeazaSincronizare(200));
+            // Preia periodic modificările făcute pe celelalte dispozitive
+            setInterval(() => {
+                if (document.visibilityState === 'visible' && !syncInCurs) sincronizeaza();
+            }, INTERVAL_VERIFICARE_MS);
+            // Dacă datele se schimbă în alt tab al aceluiași browser
+            window.addEventListener('storage', (e) => {
+                if (e.key === CHEIE_DB && e.newValue) {
+                    try {
+                        db = normalizeazaBaza(combinaBaze(db, JSON.parse(e.newValue)));
+                        refaInstantaneu();
+                        aplicaDateActualizate();
+                    } catch (err) { /* ignorat */ }
+                }
+            });
+            actualizeazaIndicatorSync();
+            programeazaSincronizare(300);
+        }
+
+        // ============================================================
+        // INSTALARE PE TELEFON / PC (PWA) + FUNCȚIONARE OFFLINE
+        // ============================================================
+        let promptInstalare = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            promptInstalare = e;
+            document.getElementById('btnInstallApp').classList.remove('hidden');
+        });
+        window.addEventListener('appinstalled', () => {
+            promptInstalare = null;
+            document.getElementById('btnInstallApp').classList.add('hidden');
+        });
+        function instaleazaAplicatia() {
+            if (!promptInstalare) return;
+            promptInstalare.prompt();
+            promptInstalare.userChoice.finally(() => {
+                promptInstalare = null;
+                document.getElementById('btnInstallApp').classList.add('hidden');
+            });
+        }
+
+        if ('serviceWorker' in navigator && !esteInAppsScript()) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    // Verifică periodic dacă există o versiune nouă a aplicației
+                    setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+                }).catch(() => { /* ex: rulare în Google Apps Script */ });
+            });
+        }
+    </script>
+</body>
+</html>
